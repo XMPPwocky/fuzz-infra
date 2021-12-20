@@ -1,1 +1,1 @@
-echo "@FUZZ_RESOURCES_DIR@"
+echo "@fuzz_resources_dir@"

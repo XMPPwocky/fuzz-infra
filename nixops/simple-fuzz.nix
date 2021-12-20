@@ -10,6 +10,29 @@
   networking.hostName = "nixos-fuzz-${name}"; # Define your hostname.
   networking.firewall.allowedTCPPorts = [ 22 80 ];
 
+  ## INSECURE, for fuzzing perf ONLY
+  boot.kernelParams = [
+    "ibpb=off"
+    "ibrs=off"
+    "kpti=off"
+    "l1tf=off"
+    "mds=off"
+    "mitigations=off"
+    "no_stf_barrier"
+    "noibpb"
+    "noibrs"
+    "nopcid"
+    "nopti"
+    "nospec_store_bypass_disable"
+    "nospectre_v1"
+    "nospectre_v2"
+    "pcid=off"
+    "pti=off"
+    "spec_store_bypass_disable=off"
+    "spectre_v2=off"
+    "stf_barrier=off"
+  ];
+
   environment.systemPackages = with pkgs; [
     aflplusplus
     valgrind

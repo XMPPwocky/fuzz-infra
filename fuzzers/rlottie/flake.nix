@@ -105,7 +105,11 @@
           mkdir -p $out/bin
 
           cp -r ./resources $out
-          substituteAll ./scripts/where-resources.sh $out/bin/where-resources.sh
+          export fuzz_resources_dir="$out/resources"
+
+          for f in scripts/*; do substituteAll $f $out/bin/$(basename $f); done
+
+          chmod +x $out/bin/*.sh
 
           cp ${rlottie-instrumented-asan-harness}/bin/harness-instrumented-asan $out/bin
           cp ${rlottie-instrumented-hardened-harness}/bin/harness-instrumented-hardened $out/bin
@@ -119,6 +123,6 @@
 
       defaultPackage.x86_64-linux = rlottie-fuzzer;
 
-      devShell.x86_64-linux = stdenv.mkDerivation { name = "shell"; buildInputs = [ pkgs.clang ]; };
+      devShell.x86_64-linux = stdenv.mkDerivation { name = "shell"; buildInputs = [ pkgs.clang rlottie-fuzzer ]; };
     };
 }
