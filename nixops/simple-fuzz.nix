@@ -33,6 +33,11 @@
     "stf_barrier=off"
   ];
 
+  systemd.coredump.enable = false;
+  security.pam.loginLimits = [
+    { domain = "*"; item = "core"; type = "soft"; value = "0"; }
+  ];
+
   environment.systemPackages = with pkgs; [
     aflplusplus
     valgrind
