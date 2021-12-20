@@ -1,4 +1,4 @@
-{ nixpkgs, ... }:
+{ nixpkgs, fuzzerPkgs, ... }:
 let mkFuzzer = import ./simple-fuzz.nix; in
 { fuzzers ? { } }: {
   inherit nixpkgs;
@@ -8,4 +8,8 @@ let mkFuzzer = import ./simple-fuzz.nix; in
     databasefile = "~/.nixops/deployments.nixops";
   };
 
-} // (builtins.trace fuzzers (builtins.mapAttrs (name: value: (mkFuzzer name value)) fuzzers))
+} // (builtins.trace fuzzers (builtins.mapAttrs
+  (name: value:
+    (mkFuzzer { name = name; fuzzerPkgs = (builtins.map (pkgName: builtins.getAttr pkgName fuzzerPkgs) value); })
+  )
+  fuzzers))

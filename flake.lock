@@ -6,7 +6,7 @@
         "rlottie": "rlottie"
       },
       "locked": {
-        "narHash": "sha256-ealU2H4k/RT2BKxizcVO7Qjqa2eODoiA50xpbWFM+9Y=",
+        "narHash": "sha256-9h2uAXXCwfdCaQaOY7US9QptIuzVJBay6RJJ2e2zxbY=",
         "path": "./fuzzers",
         "type": "path"
       },
@@ -62,7 +62,7 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "narHash": "sha256-djSkDzER8+D9ZuTUnjewCG/oEw1hF8aXCQE2HcJFFAE=",
+        "narHash": "sha256-hKOEoGTrmU5OnIUp8Y/ssviSv6zF3yN+tOYmmf4J4IE=",
         "path": "./rlottie",
         "type": "path"
       },

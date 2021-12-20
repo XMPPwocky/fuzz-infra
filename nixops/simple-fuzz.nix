@@ -1,5 +1,4 @@
-name:
-fuzzerPkg:
+{ name, fuzzerPkgs }:
 
 { config, pkgs, ... }:
 {
@@ -17,8 +16,7 @@ fuzzerPkg:
     gdb
     strace
     python39
-    fuzzerPkg
-  ];
+  ] ++ fuzzerPkgs;
 
   systemd.tmpfiles.rules = [
     "d /fuzz 0700 mimir - - -"

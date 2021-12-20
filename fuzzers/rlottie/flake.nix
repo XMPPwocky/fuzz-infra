@@ -17,7 +17,7 @@
       '';
 
       mkLottie = { suffix, env }: (
-        (pkgs.stdenv.mkDerivation {
+        (aflStdenv.mkDerivation {
           dontStrip = true;
 
           pname = "rlottie-${suffix}";
@@ -70,7 +70,7 @@
           '';
           installPhase = ''
             mkdir -p $out/bin
-            cp harness $out/bin/harness-$suffix
+            cp harness $out/bin/harness-${suffix}
           '';
         });
 
@@ -92,6 +92,25 @@
     {
       packages.x86_64-linux.rlottie-instrumented-hardened-harness = rlottie-instrumented-hardened-harness;
       packages.x86_64-linux.rlottie-instrumented-asan-harness = rlottie-instrumented-asan-harness;
+
+      packages.x86_64-linux.rlottie-fuzzer = aflStdenv.mkDerivation {
+        name = "rlottie-fuzzer";
+
+        src = ./resources;
+
+        phases = [ "installPhase" ];
+        buildInputs = [
+          aflplusplus
+          rlottie-instrumented-asan-harness
+          rlottie-instrumented-hardened-harness
+        ];
+
+        installPhase = ''
+          mkdir -p $out/resources
+          cp -r * $out/resources/
+        '';
+      };
+
       devShell.x86_64-linux = aflStdenv.mkDerivation { name = "shell"; buildInputs = [ pkgs.clang ]; };
     };
 }
