@@ -1,5 +1,20 @@
 {
   "nodes": {
+    "fuzzers": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "rlottie": "rlottie"
+      },
+      "locked": {
+        "narHash": "sha256-ealU2H4k/RT2BKxizcVO7Qjqa2eODoiA50xpbWFM+9Y=",
+        "path": "./fuzzers",
+        "type": "path"
+      },
+      "original": {
+        "path": "./fuzzers",
+        "type": "path"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1639966735,
@@ -14,9 +29,52 @@
         "type": "indirect"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1639525045,
+        "narHash": "sha256-z4GXFNzO+5V4CAUm2DDMAryLOWUKEbQif2ifvv1Ypg4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "a2e281f5770247855b85d70c43454ba5bff34613",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1639966735,
+        "narHash": "sha256-FmVGFiyqE+pjQUTCTY0H75hqrnBnbEf3VVRB4dsd4KI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d87b72206aadebe6722944f541f55d33fd7046fb",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "rlottie": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "narHash": "sha256-djSkDzER8+D9ZuTUnjewCG/oEw1hF8aXCQE2HcJFFAE=",
+        "path": "./rlottie",
+        "type": "path"
+      },
+      "original": {
+        "path": "./rlottie",
+        "type": "path"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "fuzzers": "fuzzers",
+        "nixpkgs": "nixpkgs_3"
       }
     }
   },
