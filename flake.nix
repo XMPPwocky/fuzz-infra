@@ -10,7 +10,6 @@
         };
 
         fuzz1 = import ./simple-fuzz.nix;
-
       };
     }
   );
