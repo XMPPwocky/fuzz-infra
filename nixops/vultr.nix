@@ -1,6 +1,15 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, modulesPath, ... }:
 {
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  imports =
+    [ (modulesPath + "/profiles/qemu-guest.nix")
+    ];
+
+  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "sr_mod" "virtio_blk" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
+
+  swapDevices = [ ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixos";
@@ -16,6 +25,9 @@
 
   networking.useDHCP = false;
   networking.interfaces.enp1s0.useDHCP = true;
+
+  # allow SSH here for debug
+  networking.firewall.allowedTCPPorts = [ 22 ];
 
   environment.systemPackages = with pkgs; [
     wget
