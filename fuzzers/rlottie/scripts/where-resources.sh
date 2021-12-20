@@ -1,0 +1,1 @@
+echo "@FUZZ_RESOURCES_DIR@"

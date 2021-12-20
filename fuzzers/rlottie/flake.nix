@@ -10,14 +10,14 @@
       hash = "sha256-6MUU2doYt9DaM+6oOVv7hlLF/Ef8eAcdEh/xwzyBNcc=";
 
       aflplusplus = pkgs.aflplusplus;
-      aflStdenv = pkgs.overrideCC pkgs.stdenv aflplusplus;
+      stdenv = pkgs.stdenv;
 
       cEnvSetup = ''
         export CC=afl-clang-fast CXX=afl-clang-fast++ NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE"
       '';
 
       mkLottie = { suffix, env }: (
-        (aflStdenv.mkDerivation {
+        (stdenv.mkDerivation {
           dontStrip = true;
 
           pname = "rlottie-${suffix}";
@@ -55,7 +55,7 @@
       mkLottieHarness = { suffix, env }:
         let lottie = mkLottie { suffix = suffix; env = env; };
         in
-        (aflStdenv.mkDerivation {
+        (stdenv.mkDerivation {
           dontStrip = true;
 
           pname = "rlottie-harness-${suffix}";
@@ -88,17 +88,12 @@
         '';
       };
 
-    in
-    {
-      packages.x86_64-linux.rlottie-instrumented-hardened-harness = rlottie-instrumented-hardened-harness;
-      packages.x86_64-linux.rlottie-instrumented-asan-harness = rlottie-instrumented-asan-harness;
-
-      packages.x86_64-linux.rlottie-fuzzer = aflStdenv.mkDerivation {
+      rlottie-fuzzer = stdenv.mkDerivation {
         name = "rlottie-fuzzer";
 
-        src = ./resources;
+        src = ./.;
 
-        phases = [ "installPhase" ];
+        phases = [ "unpackPhase" "installPhase" ];
         buildInputs = [
           aflplusplus
           rlottie-instrumented-asan-harness
@@ -107,10 +102,23 @@
 
         installPhase = ''
           mkdir -p $out/resources
-          cp -r * $out/resources/
+          mkdir -p $out/bin
+
+          cp -r ./resources $out
+          substituteAll ./scripts/where-resources.sh $out/bin/where-resources.sh
+
+          cp ${rlottie-instrumented-asan-harness}/bin/harness-instrumented-asan $out/bin
+          cp ${rlottie-instrumented-hardened-harness}/bin/harness-instrumented-hardened $out/bin
         '';
       };
+    in
+    {
+      packages.x86_64-linux.rlottie-instrumented-hardened-harness = rlottie-instrumented-hardened-harness;
+      packages.x86_64-linux.rlottie-instrumented-asan-harness = rlottie-instrumented-asan-harness;
+      packages.x86_64-linux.rlottie-fuzzer = rlottie-fuzzer;
 
-      devShell.x86_64-linux = aflStdenv.mkDerivation { name = "shell"; buildInputs = [ pkgs.clang ]; };
+      defaultPackage.x86_64-linux = rlottie-fuzzer;
+
+      devShell.x86_64-linux = stdenv.mkDerivation { name = "shell"; buildInputs = [ pkgs.clang ]; };
     };
 }
