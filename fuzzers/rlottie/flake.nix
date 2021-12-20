@@ -100,11 +100,14 @@
           rlottie-instrumented-hardened-harness
         ];
 
+        afl_path = "${aflplusplus}";
+
         installPhase = ''
           mkdir -p $out/resources
           mkdir -p $out/bin
 
           cp -r ./resources $out
+
           export fuzz_resources_dir="$out/resources"
 
           for f in scripts/*; do substituteAll $f $out/bin/$(basename $f); done
