@@ -12,12 +12,14 @@
 #include <stdlib.h>
 #endif
 
+__AFL_FUZZ_INIT();
+
 class App {
 public:
-    int render(uint32_t w, uint32_t h)
+    int render(std::string data, uint32_t w, uint32_t h)
     {
       // cachePolicy false!
-        auto player = rlottie::Animation::loadFromFile(fileName, false);
+        auto player = rlottie::Animation::loadFromData(data, false);
         if (!player) return help();
 
         auto buffer = std::unique_ptr<uint32_t[]>(new uint32_t[w * h]);
@@ -32,24 +34,6 @@ public:
 
     int setup(int argc, char **argv)
     {
-        char *path{nullptr};
-
-        if (argc > 1) path = argv[1];
-        if (argc > 2) bgColor = strtol(argv[2], NULL, 16);
-
-        if (!path) return help();
-
-        std::array<char, 5000> memory;
-
-#ifdef _WIN32
-        path = _fullpath(memory.data(), path, memory.size());
-#else
-        path = realpath(path, memory.data());
-#endif
-        if (!path) return help();
-
-        fileName = std::string(path);
-
         return 0;
     }
 
@@ -70,8 +54,8 @@ private:
 
 private:
     int bgColor = 0xffffffff;
-    std::string fileName;
 };
+
 
 int
 main(int argc, char **argv)
@@ -79,9 +63,23 @@ main(int argc, char **argv)
     App app;
 
     if (app.setup(argc, argv)) return 1;
+    
+#ifdef __AFL_HAVE_MANUAL_CONTROL
+  __AFL_INIT();
+#endif
+    unsigned char *buf = __AFL_FUZZ_TESTCASE_BUF;  // must be after __AFL_INIT
+                                                 // and before __AFL_LOOP!
 
-    while (__AFL_LOOP(1000)) {
-      app.render(32, 32);
+    std::string data;
+    data.reserve(131072);
+    while (__AFL_LOOP(10000)) {
+      data.clear();
+
+      int len = __AFL_FUZZ_TESTCASE_LEN;
+
+      data.append(buf, len);
+
+      app.render(data, 16, 16);
     }
 
 

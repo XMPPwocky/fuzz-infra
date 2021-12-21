@@ -9,11 +9,21 @@
       rev = "67f103bc8b625f2a4a9e94f1d8c7bd84c5a08d1d";
       hash = "sha256-6MUU2doYt9DaM+6oOVv7hlLF/Ef8eAcdEh/xwzyBNcc=";
 
-      aflplusplus = pkgs.aflplusplus;
+      aflplusplus = pkgs.aflplusplus.overrideAttrs (oldAttrs: rec {
+          version = "3.14c";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "AFLplusplus";
+            repo = "AFLplusplus";
+            rev = version;
+            sha256 = "1riqfs5wr14sqx5yybgn21hz6840xbqc2f7gyzm9nfic4anpx20z";
+          };
+      });
+
       stdenv = pkgs.stdenv;
 
       cEnvSetup = ''
-        export CC=afl-clang-fast CXX=afl-clang-fast++ NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE"
+        export CC=afl-clang-fast CXX=afl-clang-fast++ NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE -v"
       '';
 
       mkLottie = { suffix, env }: (
