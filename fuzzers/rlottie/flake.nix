@@ -63,8 +63,9 @@
       stdenv = pkgs.stdenv;
 
       cEnvSetup = ''
-        export CC=afl-cc CXX=afl-c++ LD=${ld} NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE"
+        export CC=afl-cc CXX=afl-c++ LD=${ld}/bin/ld.lld NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE"
         export AFL_LLVM_INSTRUMENT=lto
+        export AR=llvm-ar RANLIB=llvm-ranlib
       '';
 
       mkLottie = { suffix, env }: (
@@ -91,7 +92,7 @@
             cd build;
             ${cEnvSetup} 
             ${env}
-            cmake ..
+            cmake -DBUILD_SHARED_LIBS=off -DLOTTIE_CACHE=off -DLOTTIE_MODULE=off ..
           '';
           buildPhase = ''
             ${cEnvSetup}
@@ -100,7 +101,7 @@
           '';
           installPhase = ''
             mkdir -p $out/lib
-            cp librlottie.so* $out/lib
+            cp librlottie.a $out/lib
             mkdir -p $out/include
             cp -r ../inc/* $out/include
           '';
@@ -163,6 +164,7 @@
           cp -r ./resources $out
 
           export fuzz_resources_dir="$out/resources"
+          export harness="${rlottie-instrumented-asan-harness}/bin/harness-instrumented-asan"
 
           for f in scripts/*; do substituteAll $f $out/bin/$(basename $f); done
 

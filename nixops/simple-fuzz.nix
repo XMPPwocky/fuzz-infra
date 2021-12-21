@@ -10,6 +10,8 @@
   networking.hostName = "nixos-fuzz-${name}"; # Define your hostname.
   networking.firewall.allowedTCPPorts = [ 22 80 ];
 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   ## INSECURE, for fuzzing perf ONLY
   boot.kernelParams = [
     "ibpb=off"
