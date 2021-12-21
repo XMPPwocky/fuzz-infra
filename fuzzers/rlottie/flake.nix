@@ -26,15 +26,17 @@
           rev = "74a8f145e09d0361d8f576eb3f2e8881b6116f18";
           sha256 = "1myrqysapixh60sha7y9dzpi3wanz3ragqjdi4yivppcr5rpldxh";
         };
-        gcc = pkgs.gcc;
 
-        patches = [ ./01-dumb-workaround.patch ];
+        gcc = pkgs.gcc;
+        
+        buildInputs = oldAttrs.buildInputs ++ [ ld ];
 
         postPatch = ''
           # Replace the CLANG_BIN, etc. variables with the correct path
           substituteInPlace src/afl-cc.c \
             --replace "CLANG_BIN" '"${clang}/bin/clang"' \
             --replace "CLANGPP_BIN" '"${clang}/bin/clang++"' \
+            --replace 'getenv("AFL_REAL_LD")' "(getenv(\"AFL_REAL_LD\") ? getenv(\"AFL_REAL_LD\") : \"${ld}/bin/ld.lld\")" \
             --replace 'getenv("AFL_PATH")' "(getenv(\"AFL_PATH\") ? getenv(\"AFL_PATH\") : \"$out/lib/afl\")" \
             --replace '"gcc"' '"${gcc}/bin/gcc"' \
             --replace '"g++"' '"${gcc}/bin/g++"' \
@@ -43,7 +45,7 @@
             --replace '"clang++"' '"clang++-UNSUPPORTED"'
         '';
 
-        makeFlags = [ "PREFIX=$(out)" ];
+        makeFlags = [ "PREFIX=$(out)" "AFL_REAL_LD=${ld}/bin/ld.lld" ];
 
         buildPhase = ''
           common="$makeFlags -j$NIX_BUILD_CORES"
@@ -53,6 +55,8 @@
         postInstall = ''
           # remove afl-clang(++) which are just symlinks to afl-clang-fast
           rm $out/bin/afl-clang $out/bin/afl-clang++
+
+          # add lto
         '';
       });
 
@@ -60,6 +64,7 @@
 
       cEnvSetup = ''
         export CC=afl-cc CXX=afl-c++ LD=${ld} NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE"
+        export AFL_LLVM_INSTRUMENT=lto
       '';
 
       mkLottie = { suffix, env }: (
@@ -78,7 +83,9 @@
           nativeBuildInputs = [ aflplusplus ];
           buildInputs = [
             pkgs.cmake
+            llvmPackages.lld
           ];
+          patches = [ ./01-dumb-workaround.patch ];
           configurePhase = ''
             mkdir build;
             cd build;
@@ -110,6 +117,7 @@
           src = ./src;
           nativeBuildInputs = [ aflplusplus ];
           buildInputs = [ lottie ];
+
           buildPhase = ''
             ${cEnvSetup}
             ${env}
