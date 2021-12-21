@@ -1,10 +1,10 @@
-{ name, fuzzerPkgs }:
+{ name, fuzzerPkgs, addr }:
 
 { config, pkgs, ... }:
 {
   imports = [ ./vultr.nix ];
 
-  deployment.targetHost = "45.32.226.241";
+  deployment.targetHost = addr;
   deployment.targetUser = "mimir";
 
   networking.hostName = "nixos-fuzz-${name}"; # Define your hostname.

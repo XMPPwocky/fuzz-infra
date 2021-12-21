@@ -27,6 +27,7 @@ class App {
       auto buffer = std::unique_ptr<uint32_t[]>(new uint32_t[w * h]);
       size_t frameCount = player->totalFrame();
 
+      if (frameCount > 8) { return frameCount; }
       for (size_t i = 0; i < frameCount ; i++) {
         rlottie::Surface surface(buffer.get(), w, h, w * 4);
         player->renderSync(i, surface);
@@ -58,7 +59,7 @@ main(int argc, char **argv)
    while (__AFL_LOOP(100000)) {
     int len = __AFL_FUZZ_TESTCASE_LEN;
 
-    app.render((char*)buf, 32, 32);
+    app.render((char*)buf, 4, 4);
   }
 
   return 0;

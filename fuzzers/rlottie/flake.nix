@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "aeiou";
 
   outputs = { self, nixpkgs }:
 
@@ -153,6 +153,7 @@
           aflplusplus
           rlottie-instrumented-asan-harness
           rlottie-instrumented-hardened-harness
+          llvm
         ];
 
         afl_path = "${aflplusplus}";
@@ -164,7 +165,7 @@
           cp -r ./resources $out
 
           export fuzz_resources_dir="$out/resources"
-          export harness="${rlottie-instrumented-asan-harness}/bin/harness-instrumented-asan"
+          export harness="${rlottie-instrumented-hardened-harness}/bin/harness-instrumented-hardened"
 
           for f in scripts/*; do substituteAll $f $out/bin/$(basename $f); done
 
@@ -172,6 +173,9 @@
 
           cp ${rlottie-instrumented-asan-harness}/bin/harness-instrumented-asan $out/bin
           cp ${rlottie-instrumented-hardened-harness}/bin/harness-instrumented-hardened $out/bin
+
+          # lol (for asan)
+          ln -s ${llvm}/bin/llvm-symbolizer $out/bin
         '';
       };
     in
