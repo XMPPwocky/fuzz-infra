@@ -1,5 +1,6 @@
 #include <rlottie.h>
 
+#include <unistd.h>
 #include<iostream>
 #include<string>
 #include<vector>
@@ -19,7 +20,7 @@ public:
     int render(std::string data, uint32_t w, uint32_t h)
     {
       // cachePolicy false!
-        auto player = rlottie::Animation::loadFromData(data, false);
+        auto player = rlottie::Animation::loadFromData(data, "dummyKey", "", false);
         if (!player) return help();
 
         auto buffer = std::unique_ptr<uint32_t[]>(new uint32_t[w * h]);
@@ -77,7 +78,7 @@ main(int argc, char **argv)
 
       int len = __AFL_FUZZ_TESTCASE_LEN;
 
-      data.append(buf, len);
+      data.append((char *)buf, len);
 
       app.render(data, 16, 16);
     }

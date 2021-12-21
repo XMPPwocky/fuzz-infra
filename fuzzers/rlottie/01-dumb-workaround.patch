@@ -1,0 +1,13 @@
+diff --git a/src/lottie/lottieparser.cpp b/src/lottie/lottieparser.cpp
+index 5dccf17..0d72baa 100644
+--- a/src/lottie/lottieparser.cpp
++++ b/src/lottie/lottieparser.cpp
+@@ -446,7 +446,7 @@ const char *LottieParserImpl::GetString()
+     if (st_ != kHasString) {
+         st_ = kError;
+         //RAPIDJSON_ASSERT(false);
+-        return nullptr;
++        return "WORKAROUND";
+     }
+ 
+     const char *result = v_.GetString();

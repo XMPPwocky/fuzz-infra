@@ -9,25 +9,62 @@
       rev = "67f103bc8b625f2a4a9e94f1d8c7bd84c5a08d1d";
       hash = "sha256-6MUU2doYt9DaM+6oOVv7hlLF/Ef8eAcdEh/xwzyBNcc=";
 
-      aflplusplus = pkgs.aflplusplus.overrideAttrs (oldAttrs: rec {
-          version = "3.14c";
+      llvmPackages = pkgs.llvmPackages_13;
+      llvm = llvmPackages.llvm;
+      clang = llvmPackages.clang;
+      ld = llvmPackages.lld;
+      aflplusplus = (pkgs.aflplusplus.override { clang = clang; llvm = llvm; }).overrideAttrs (oldAttrs: rec {
+        inherit llvm;
+        inherit clang;
 
-          src = pkgs.fetchFromGitHub {
-            owner = "AFLplusplus";
-            repo = "AFLplusplus";
-            rev = version;
-            sha256 = "1riqfs5wr14sqx5yybgn21hz6840xbqc2f7gyzm9nfic4anpx20z";
-          };
+        version = "3.15a-dev";
+        doInstallCheck = false;
+
+        src = pkgs.fetchFromGitHub {
+          owner = "AFLplusplus";
+          repo = "AFLplusplus";
+          rev = "74a8f145e09d0361d8f576eb3f2e8881b6116f18";
+          sha256 = "1myrqysapixh60sha7y9dzpi3wanz3ragqjdi4yivppcr5rpldxh";
+        };
+        gcc = pkgs.gcc;
+
+        patches = [ ./01-dumb-workaround.patch ];
+
+        postPatch = ''
+          # Replace the CLANG_BIN, etc. variables with the correct path
+          substituteInPlace src/afl-cc.c \
+            --replace "CLANG_BIN" '"${clang}/bin/clang"' \
+            --replace "CLANGPP_BIN" '"${clang}/bin/clang++"' \
+            --replace 'getenv("AFL_PATH")' "(getenv(\"AFL_PATH\") ? getenv(\"AFL_PATH\") : \"$out/lib/afl\")" \
+            --replace '"gcc"' '"${gcc}/bin/gcc"' \
+            --replace '"g++"' '"${gcc}/bin/g++"' \
+            --replace '"gcj"' '"gcj-UNSUPPORTED"' \
+            --replace '"clang"' '"clang-UNSUPPORTED"' \
+            --replace '"clang++"' '"clang++-UNSUPPORTED"'
+        '';
+
+        makeFlags = [ "PREFIX=$(out)" ];
+
+        buildPhase = ''
+          common="$makeFlags -j$NIX_BUILD_CORES"
+          make distrib $common
+        '';
+
+        postInstall = ''
+          # remove afl-clang(++) which are just symlinks to afl-clang-fast
+          rm $out/bin/afl-clang $out/bin/afl-clang++
+        '';
       });
 
       stdenv = pkgs.stdenv;
 
       cEnvSetup = ''
-        export CC=afl-clang-fast CXX=afl-clang-fast++ NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE -v"
+        export CC=afl-cc CXX=afl-c++ LD=${ld} NIX_CFLAGS_COMPILE="-w -g $NIX_CFLAGS_COMPILE"
       '';
 
       mkLottie = { suffix, env }: (
         (stdenv.mkDerivation {
+
           dontStrip = true;
 
           pname = "rlottie-${suffix}";
@@ -94,7 +131,6 @@
         suffix = "instrumented-asan";
         env = ''
           export AFL_USE_ASAN="1";
-          export AFL_USE_CFISAN="1";
         '';
       };
 
